@@ -73,7 +73,53 @@ def collect_trending(con):
     print(f"trending: {len(rows)} fetched, {new} new")
 
 
-SOURCES = {"trending": collect_trending}
+def load_keywords(path=HERE / "keywords.txt"):
+    lines = (l.strip() for l in path.read_text(encoding="utf-8").splitlines())
+    return list(dict.fromkeys(l for l in lines if l and not l.startswith("#")))
+
+
+def fetch_interest(keyword):
+    """Return [(date 'YYYY-MM-DD', value)] for the last 3 months, complete days only."""
+    from pytrends.request import TrendReq  # imported here so the RSS source works without pytrends
+
+    pt = TrendReq(hl="id-ID", tz=-420)  # tz is minutes *behind* UTC; WIB is UTC+7
+    pt.build_payload([keyword], timeframe="today 3-m", geo=GEO)  # alone, so values are relative to its own peak
+    df = pt.interest_over_time()
+    if df.empty:
+        return []
+    df = df[~df["isPartial"]]  # today's partial value would look like a fake dip
+    return [(d.strftime("%Y-%m-%d"), int(v)) for d, v in df[keyword].items()]
+
+
+def save_interest(con, keyword, points, fetched_at):
+    # REPLACE: Google rescales the whole series on every fetch, so keep the newest consistent copy
+    con.executemany(
+        "INSERT OR REPLACE INTO interest VALUES (?, ?, ?, ?, ?)",
+        [(GEO, keyword, d, v, fetched_at) for d, v in points],
+    )
+    con.commit()
+
+
+def collect_interest(con, keywords=None, fetch=fetch_interest, pause=10):
+    import time
+
+    keywords = keywords if keywords is not None else load_keywords()
+    failures = []
+    for i, kw in enumerate(keywords):
+        if i:
+            time.sleep(pause)  # shortcut: fixed delay against 429s; add backoff if they become frequent
+        try:
+            points = fetch(kw)
+            save_interest(con, kw, points, now_utc())
+            print(f"interest: {kw!r} {len(points)} days")
+        except Exception as e:  # one keyword failing must not stop the rest
+            print(f"interest: {kw!r} FAILED - {e}", file=sys.stderr)
+            failures.append(kw)
+    if failures and len(failures) == len(keywords):
+        raise RuntimeError(f"all {len(keywords)} keywords failed")
+
+
+SOURCES = {"trending": collect_trending, "interest": collect_interest}
 
 
 def main(argv=None):
