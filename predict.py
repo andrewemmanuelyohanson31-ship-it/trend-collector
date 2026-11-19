@@ -12,6 +12,7 @@ from collect import TARGET, connect, load_keywords, tracked
 
 RECENT = 4  # weeks
 BASE = 12  # weeks before RECENT
+ID_GROWTH_CAP = 5  # growth from ~0 is huge but meaningless; cap it in the score
 
 
 def momentum(values):
@@ -26,11 +27,20 @@ def assess(src, idn):
     """(score, stage, growth abroad, growth in Indonesia) from weekly 0-100 series."""
     src_m, id_m = momentum(src), momentum(idn)
     id_now = sum(idn[-RECENT:]) / RECENT if len(idn) >= RECENT else 0
-    if not any(idn[-RECENT - BASE:]):
+    window = idn[-RECENT - BASE:]
+    # Few searches: Google scales each series to its own peak, so 2 searches after months of 0 read as "100"
+    sparse = window.count(0) > len(window) / 2
+    if not any(window):
         stage = "growing abroad, not in Indonesia yet" if src_m >= 1.3 else "not in Indonesia"
         score = 0.5 * math.log(src_m)
+    elif sparse and sum(1 for v in idn[-RECENT:] if v) >= 3:
+        stage = "first signs in Indonesia"  # searched most recent weeks after a quiet stretch
+        score = 0.5 * math.log(src_m) + math.log(min(id_m, ID_GROWTH_CAP))
+    elif sparse:
+        stage = "too few searches in Indonesia"
+        score = 0.5 * math.log(src_m)
     else:
-        score = 0.5 * math.log(src_m) + math.log(id_m)
+        score = 0.5 * math.log(src_m) + math.log(min(id_m, ID_GROWTH_CAP))
         if id_m >= 1.5:
             stage = "rising in Indonesia"
         elif id_now >= 60 and id_m < 0.9:
@@ -47,12 +57,17 @@ def series(con, keyword, geo):
         "SELECT value FROM interest WHERE keyword = ? AND geo = ? AND value IS NOT NULL ORDER BY date", (keyword, geo))]
 
 
+def fetched(con, keyword, geo):
+    return con.execute("SELECT 1 FROM interest WHERE keyword = ? AND geo = ?", (keyword, geo)).fetchone() is not None
+
+
 def predict(con, pairs):
     out = []
     for kw, src in pairs:
         s, i = series(con, kw, src), series(con, kw, TARGET)
-        if not s or not i:
+        if not s or not fetched(con, kw, TARGET):
             continue  # not fetched yet
+        i = i or [0] * len(s)  # fetched, but Google had no Indonesian data at all
         score, stage, src_m, id_m = assess(s, i)
         out.append({"keyword": kw, "source": src, "stage": stage, "score": score,
                     "growth_abroad": src_m, "growth_indonesia": id_m})
