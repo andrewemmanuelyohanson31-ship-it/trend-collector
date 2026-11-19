@@ -83,7 +83,7 @@ python export.py                   # all tables -> trending.csv, candidates.csv,
 
 Windows (Task Scheduler, daily at 09:00; runs collect + predict, logs to `logs/collect.log`):
 ```powershell
-schtasks /create /tn "TrendCollector" /sc daily /st 09:00 /tr "C:\Users\ikank\trend-collector\run.bat"
+schtasks /create /tn "TrendCollector" /sc daily /st 09:00 /tr "C:\path\to\trend-collector\run.bat"
 ```
 
 macOS / Linux (cron):
