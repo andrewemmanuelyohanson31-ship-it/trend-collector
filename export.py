@@ -5,7 +5,7 @@ from pathlib import Path
 
 from collect import connect
 
-TABLES = {"trending": "pub_date, term", "interest": "keyword, date"}
+TABLES = {"trending": "geo, pub_date, term", "candidates": "last_seen DESC, term", "interest": "keyword, geo, date"}
 
 
 def export(con, out_dir):

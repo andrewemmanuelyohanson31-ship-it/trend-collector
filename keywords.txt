@@ -1,5 +1,7 @@
-kanzler
-sosis
-nugget
-frozen food
+# Reference keywords: known recent virals, always tracked (vs US) to calibrate the predictions.
+# Auto keywords come from rising searches abroad - see candidates table.
+padel
+mahjong
+pickleball
+labubu
 matcha
