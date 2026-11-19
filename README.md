@@ -40,6 +40,8 @@ later analysis.
 months of data have built up, the score can be checked against what actually took off, and tuned or replaced
 by a trained model.
 
+Latest results snapshot: [docs/results-2026-11-19.md](docs/results-2026-11-19.md) (data collected, backtest, today's predictions).
+
 ### Backtest (does it work?)
 
 `python backtest.py` fetches 5 years of weekly history for the reference keywords and replays the predictor week by
