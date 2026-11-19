@@ -8,6 +8,7 @@ scores lead-lag growth. Data → SQLite (`trends.db`) → CSV for data-analyst-a
   classify (local Ollama qwen2.5:3b) → interest (12-month weekly, source geo + ID)
 - `predict.py` — heuristic score + stage → `predictions.csv`
 - `export.py` — all tables to CSV
+- `backtest.py` — replays predict on 5-year history of reference keywords (`history` table)
 - `keywords.txt` — reference keywords (known virals), always tracked vs US
 - `run.bat` — daily job (collect + predict), logs to `logs/collect.log`
 - `tests/` — stdlib `unittest`, offline (network and Ollama faked via injected `fetch`/`ask` functions)

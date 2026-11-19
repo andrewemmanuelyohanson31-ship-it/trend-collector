@@ -40,6 +40,26 @@ later analysis.
 months of data have built up, the score can be checked against what actually took off, and tuned or replaced
 by a trained model.
 
+### Backtest (does it work?)
+
+`python backtest.py` fetches 5 years of weekly history for the reference keywords and replays the predictor week by
+week, using only the 52 weeks it would have seen at the time. Result on 2026-11-19, signal = "rising" or
+"first signs", success = Indonesian interest 30%+ higher 8 weeks later:
+
+| Keyword | Weeks signalled | Success when signalled | Success in any week |
+|---|---|---|---|
+| labubu | 24 | **71%** | 9% |
+| padel | 35 | **66%** | 34% |
+| pickleball | 18 | 39% | 25% |
+| mahjong | 33 | 27% | 32% |
+| matcha | 8 | 0% | 10% |
+| **all** | 118 | **47%** | 22% |
+
+So a signal roughly **doubles the odds** of real growth: strong for genuine take-offs (labubu got *first signs* 17
+weeks before its Indonesian peak), useless for trends that are already mature or move in waves (mahjong, matcha).
+Treat it as a filter for what to look at, not a prediction. Caveat: 5 keywords, all of which did take off, so this
+says nothing yet about false alarms on fads that never arrived; the daily data will make that testable.
+
 ### Reference keywords
 
 `keywords.txt` holds known recent virals (padel, mahjong, pickleball, labubu, matcha). They're always tracked,
