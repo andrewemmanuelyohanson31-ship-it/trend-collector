@@ -1,0 +1,8 @@
+[server]
+address = "localhost"  # local only, not reachable from the network
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"  # no "Deploy" button: this is a local app

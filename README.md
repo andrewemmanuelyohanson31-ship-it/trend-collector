@@ -101,11 +101,25 @@ python predict.py                  # rank fads -> predictions.csv
 python export.py                   # all tables -> trending.csv, candidates.csv, interest.csv
 ```
 
+## Dashboard
+
+```bash
+python launch.py --install         # once: "Trend Collector" shortcut on the Desktop (Windows) or .app (macOS)
+python launch.py                   # or double-click the shortcut: opens in its own window, no terminal
+```
+
+Local, read-only app over `trends.db` (same launcher as data-analyst-agent): top pick and counts, the ranking,
+abroad vs Indonesia interest per keyword, and the latest trending searches per country. It ranks with
+`predict.py` on every load, so it shows the newest run. Stop it with **Quit app** in the sidebar.
+
 ## Run it every day
 
-Windows (Task Scheduler, daily at 09:00; runs collect + predict, logs to `logs/collect.log`):
+Windows (Task Scheduler; runs collect + predict, logs to `logs/collect.log`). Create the task once, then run
+`setup-task.ps1` as admin so it runs 2 min after every boot (logged in or not) and every 24h while the PC is on.
+`run.bat` starts Ollama if it is not running yet:
 ```powershell
 schtasks /create /tn "TrendCollector" /sc daily /st 09:00 /tr "C:\path\to\trend-collector\run.bat"
+powershell -ExecutionPolicy Bypass -File setup-task.ps1   # as admin
 ```
 
 macOS / Linux (cron):
@@ -113,7 +127,7 @@ macOS / Linux (cron):
 0 9 * * * cd /path/to/trend-collector && .venv/bin/python collect.py && .venv/bin/python predict.py >> logs/collect.log 2>&1
 ```
 
-The PC must be on (and Ollama running) at that time. Missed days leave gaps in `trending` and `candidates`;
+On cron the PC must be on (and Ollama running) at that time. Missed days leave gaps in `trending` and `candidates`;
 `interest` refills its 12 months on the next run.
 
 ## Data (trends.db)

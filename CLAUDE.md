@@ -9,13 +9,16 @@ scores lead-lag growth. Data → SQLite (`trends.db`) → CSV for data-analyst-a
 - `predict.py` — heuristic score + stage → `predictions.csv`
 - `export.py` — all tables to CSV
 - `backtest.py` — replays predict on 5-year history of reference keywords (`history` table)
+- `dashboard.py` — local read-only Streamlit app over `trends.db` (metrics, ranking, chart, trending)
+- `launch.py` — opens the dashboard as an app window; `--install` makes the Desktop shortcut (from data-analyst-agent)
 - `keywords.txt` — reference keywords (known virals), always tracked vs US
 - `run.bat` — scheduled job (starts Ollama if needed, collect + predict), logs to `logs/collect.log`
 - `setup-task.ps1` — run once as admin: task runs at boot (logged in or not) and every 24h while on
 - `tests/` — stdlib `unittest`, offline (network and Ollama faked via injected `fetch`/`ask` functions)
 
 ## Rules
-- `pytrends` is the only dependency; RSS and Ollama calls use the standard library.
+- `pytrends` is the collector's only dependency; RSS and Ollama calls use the standard library. `streamlit`
+  (with its pandas) is used only by `dashboard.py`; never import it from collect/predict/export.
 - Writes are idempotent (primary keys + INSERT OR IGNORE / REPLACE / upsert).
 - One failing request, keyword, country or step must not abort the run; log it and continue.
 - Fetch each keyword alone in pytrends (values are relative to the request, so batching mixes them).

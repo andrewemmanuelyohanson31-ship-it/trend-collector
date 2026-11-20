@@ -1,1 +1,2 @@
 pytrends==4.9.2
+streamlit>=1.67,<2  # dashboard only
