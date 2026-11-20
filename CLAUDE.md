@@ -10,7 +10,8 @@ scores lead-lag growth. Data → SQLite (`trends.db`) → CSV for data-analyst-a
 - `export.py` — all tables to CSV
 - `backtest.py` — replays predict on 5-year history of reference keywords (`history` table)
 - `keywords.txt` — reference keywords (known virals), always tracked vs US
-- `run.bat` — daily job (collect + predict), logs to `logs/collect.log`
+- `run.bat` — scheduled job (starts Ollama if needed, collect + predict), logs to `logs/collect.log`
+- `setup-task.ps1` — run once as admin: task runs at boot (logged in or not) and every 24h while on
 - `tests/` — stdlib `unittest`, offline (network and Ollama faked via injected `fetch`/`ask` functions)
 
 ## Rules
